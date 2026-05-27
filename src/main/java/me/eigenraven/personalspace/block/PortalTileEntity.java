@@ -1,5 +1,6 @@
 package me.eigenraven.personalspace.block;
 
+import coint.player.TeamsManager;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -32,7 +33,8 @@ public class PortalTileEntity extends TileEntity {
     public ForgeDirection targetFacing = DEFAULT_FACING;
     public ForgeDirection facing = DEFAULT_FACING;
 
-    public PortalTileEntity() {}
+    public PortalTileEntity() {
+    }
 
     @Override
     public void readFromNBT(NBTTagCompound tag) {
@@ -93,12 +95,7 @@ public class PortalTileEntity extends TileEntity {
 
         if (isLegacy) {
             this.active = true;
-            PersonalSpaceMod.LOG.info(
-                    "Migrated old UW portal to dim {} : target {},{},{}",
-                    targetDimId,
-                    targetPosX,
-                    targetPosY,
-                    targetPosZ);
+            PersonalSpaceMod.LOG.info("Migrated old UW portal to dim {} : target {},{},{}", targetDimId, targetPosX, targetPosY, targetPosZ);
             markDirty();
         }
         if (facing == ForgeDirection.UNKNOWN) {
@@ -118,7 +115,7 @@ public class PortalTileEntity extends TileEntity {
     public void writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
         tag.setBoolean("active", this.active);
-        tag.setIntArray("target", new int[] { this.targetDimId, this.targetPosX, this.targetPosY, this.targetPosZ });
+        tag.setIntArray("target", new int[]{this.targetDimId, this.targetPosX, this.targetPosY, this.targetPosZ});
         tag.setInteger("facing", this.facing.ordinal());
         tag.setInteger("targetFacing", this.targetFacing.ordinal());
     }
@@ -143,10 +140,7 @@ public class PortalTileEntity extends TileEntity {
             return;
         }
         if (!DimensionManager.isDimensionRegistered(this.targetDimId)) {
-            PersonalSpaceMod.LOG.warn(
-                    "Player {} attempted to teleport to dimension {} which is not registered yet",
-                    player.getGameProfile(),
-                    this.targetDimId);
+            PersonalSpaceMod.LOG.warn("Player {} attempted to teleport to dimension {} which is not registered yet", player.getGameProfile(), this.targetDimId);
             return;
         }
 
@@ -184,7 +178,8 @@ public class PortalTileEntity extends TileEntity {
             return;
         }
         int otherX = targetPosX, otherY = targetPosY, otherZ = targetPosZ;
-        searchloop: for (otherX = targetPosX - 1; otherX <= targetPosX + 1; otherX++) {
+        searchloop:
+        for (otherX = targetPosX - 1; otherX <= targetPosX + 1; otherX++) {
             for (otherY = targetPosY - 1; otherY <= targetPosY + 1; otherY++) {
                 if (otherY < 0 || otherY > otherWorld.getHeight()) continue;
                 for (otherZ = targetPosZ - 1; otherZ <= targetPosZ + 1; otherZ++) {
@@ -229,16 +224,7 @@ public class PortalTileEntity extends TileEntity {
             if (player != null) {
                 player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.relinked", targetDimId));
             }
-            PersonalSpaceMod.LOG.info(
-                    "Linked portal at {}:{},{},{} to {}:{},{},{}",
-                    targetDimId,
-                    otherX,
-                    otherY,
-                    otherZ,
-                    worldObj.provider.dimensionId,
-                    xCoord,
-                    yCoord,
-                    zCoord);
+            PersonalSpaceMod.LOG.info("Linked portal at {}:{},{},{} to {}:{},{},{}", targetDimId, otherX, otherY, otherZ, worldObj.provider.dimensionId, xCoord, yCoord, zCoord);
         }
     }
 
@@ -249,63 +235,41 @@ public class PortalTileEntity extends TileEntity {
         if (!worldObj.canMineBlock(player, xCoord, yCoord, zCoord)) {
             // permissions check
             player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.denied"));
-            PersonalSpaceMod.LOG.warn(
-                    "Player {} tried to modify settings for portal block @{},{},{} (dim {}, target dim {}), denied - spawn protection.",
-                    player,
-                    xCoord,
-                    yCoord,
-                    zCoord,
-                    worldObj.provider.dimensionId,
-                    targetDimId);
+            PersonalSpaceMod.LOG.warn("Player {} tried to modify settings for portal block @{},{},{} (dim {}, target dim {}), denied - spawn protection.", player, xCoord, yCoord, zCoord, worldObj.provider.dimensionId, targetDimId);
             return;
         }
         // Send a fake block break event to test permissions further
         if (Config.useBlockEventChecks) {
-            BlockEvent.BreakEvent fakeBreakEvent = new BlockEvent.BreakEvent(
-                    xCoord,
-                    yCoord,
-                    zCoord,
-                    worldObj,
-                    PersonalSpaceMod.BLOCK_PORTAL,
-                    0,
-                    player);
+            BlockEvent.BreakEvent fakeBreakEvent = new BlockEvent.BreakEvent(xCoord, yCoord, zCoord, worldObj, PersonalSpaceMod.BLOCK_PORTAL, 0, player);
             if (MinecraftForge.EVENT_BUS.post(fakeBreakEvent)) {
                 player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.denied"));
-                PersonalSpaceMod.LOG.warn(
-                        "Player {} tried to modify settings for portal block @{},{},{} (dim {}, target dim {}), denied - block permission.",
-                        player,
-                        xCoord,
-                        yCoord,
-                        zCoord,
-                        worldObj.provider.dimensionId,
-                        targetDimId);
+                PersonalSpaceMod.LOG.warn("Player {} tried to modify settings for portal block @{},{},{} (dim {}, target dim {}), denied - block permission.", player, xCoord, yCoord, zCoord, worldObj.provider.dimensionId, targetDimId);
                 return;
             }
         }
         if (!DimensionConfig.canUseLayers(unsafeConfig.getLayersAsString(), false)) {
             player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.badLayers"));
-            PersonalSpaceMod.LOG.warn(
-                    "Player {} tried to modify settings for portal block @{},{},{} (dim {}, target dim {}), denied - using forbidden layers.",
-                    player,
-                    xCoord,
-                    yCoord,
-                    zCoord,
-                    worldObj.provider.dimensionId,
-                    targetDimId);
+            PersonalSpaceMod.LOG.warn("Player {} tried to modify settings for portal block @{},{},{} (dim {}, target dim {}), denied - using forbidden layers.", player, xCoord, yCoord, zCoord, worldObj.provider.dimensionId, targetDimId);
             return;
         }
+
         if (!DimensionConfig.canUseBiome(unsafeConfig.getBiomeId(), false)) {
             unsafeConfig.setBiomeId("Plains");
         }
         DimensionConfig sanitized = new DimensionConfig();
         sanitized.copyFrom(unsafeConfig, false, true, true);
-        boolean createdNewDim = false;
+
         int targetDimId = 0;
         if (this.worldObj.provider instanceof PersonalWorldProvider) {
             targetDimId = this.worldObj.provider.dimensionId;
         } else if (this.active) {
             targetDimId = this.targetDimId;
+        } else if (TeamsManager.get().hasDimBinding(player)) {
+            targetDimId = TeamsManager.get().getDim(player);
+            player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.teamBinding"));
         }
+
+        boolean createdNewDim = false;
         boolean changed = true;
         if (targetDimId > 0) {
             DimensionConfig realConfig = DimensionConfig.getForDimension(targetDimId, false);
@@ -334,6 +298,7 @@ public class PortalTileEntity extends TileEntity {
         }
         Packets.INSTANCE.sendWorldList().sendToClients();
         if (createdNewDim) {
+            TeamsManager.get().bindDim(player, this.targetDimId);
             player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.created"));
         } else if (changed) {
             player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.updated"));

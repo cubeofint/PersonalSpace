@@ -70,7 +70,7 @@ import me.eigenraven.personalspace.world.PersonalWorldProvider;
         version = Tags.VERSION,
         name = PersonalSpaceMod.MODNAME,
         acceptedMinecraftVersions = "[1.7.10]",
-        dependencies = "after:utilityworlds;after:appliedenergistics2-core;after:GalaxySpace;after:Thaumcraft")
+        dependencies = "after:utilityworlds;after:appliedenergistics2-core;after:GalaxySpace;after:Thaumcraft;after:cointcore")
 public class PersonalSpaceMod {
 
     public static final String MODID = "personalspace";
