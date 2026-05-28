@@ -18,6 +18,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +29,7 @@ import appeng.api.AEApi;
 import appeng.api.IAppEngApi;
 import appeng.api.features.IWorldGen;
 import codechicken.lib.packet.PacketCustom;
+import coint.DimensionCleaner;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Loader;
@@ -193,6 +195,17 @@ public class PersonalSpaceMod {
                     try {
                         DimensionConfig dimCfg = new DimensionConfig();
                         int dimId = dimCfg.syncWithFile(dimConfig, false, 0);
+
+                        if (DimensionCleaner.excludeRegisterList.contains(dimId)) {
+                            LOG.info("Skipped PersonalSpace world {} (at {})", dimId, dir.getName());
+                            continue;
+                        }
+                        if (DimensionCleaner.deleteList.contains(dimId)) {
+                            FileUtils.deleteDirectory(dir);
+                            LOG.info("Deleted PersonalSpace world {} (at {})", dimId, dir.getName());
+                            continue;
+                        }
+
                         dimCfg.setSaveDirOverride(dir.getName());
                         dimCfg.registerWithDimensionManager(dimId, false);
                         LOG.info("Loaded PersonalSpace world {} (at {})", dimId, dir.getName());
