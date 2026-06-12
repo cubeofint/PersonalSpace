@@ -14,6 +14,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.world.BlockEvent;
 
 import coint.player.TeamsManager;
+import cpw.mods.fml.common.Loader;
 import me.eigenraven.personalspace.PersonalSpaceMod;
 import me.eigenraven.personalspace.config.Config;
 import me.eigenraven.personalspace.net.Packets;
@@ -307,7 +308,7 @@ public class PortalTileEntity extends TileEntity {
             targetDimId = this.worldObj.provider.dimensionId;
         } else if (this.active) {
             targetDimId = this.targetDimId;
-        } else if (TeamsManager.get().hasDimBinding(player)) {
+        } else if (Loader.isModLoaded("cointcore") && TeamsManager.get().hasDimBinding(player)) {
             targetDimId = TeamsManager.get().getDim(player);
             player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.teamBinding"));
         }
@@ -341,7 +342,7 @@ public class PortalTileEntity extends TileEntity {
         }
         Packets.INSTANCE.sendWorldList().sendToClients();
         if (createdNewDim) {
-            TeamsManager.get().bindDim(player, this.targetDimId);
+            if (Loader.isModLoaded("cointcore")) TeamsManager.get().bindDim(player, this.targetDimId);
             player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.created"));
         } else if (changed) {
             player.addChatMessage(new ChatComponentTranslation("chat.personalWorld.updated"));

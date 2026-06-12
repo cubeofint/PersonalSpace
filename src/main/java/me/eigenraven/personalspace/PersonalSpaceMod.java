@@ -196,16 +196,17 @@ public class PersonalSpaceMod {
                         DimensionConfig dimCfg = new DimensionConfig();
                         int dimId = dimCfg.syncWithFile(dimConfig, false, 0);
 
-                        if (DimensionCleaner.excludeRegisterList.contains(dimId)) {
-                            LOG.info("Skipped PersonalSpace world {} (at {})", dimId, dir.getName());
-                            continue;
+                        if (Loader.isModLoaded("cointcore")) {
+                            if (DimensionCleaner.excludeRegisterList.contains(dimId)) {
+                                LOG.info("Skipped PersonalSpace world {} (at {})", dimId, dir.getName());
+                                continue;
+                            }
+                            if (DimensionCleaner.deleteList.contains(dimId)) {
+                                FileUtils.deleteDirectory(dir);
+                                LOG.info("Deleted PersonalSpace world {} (at {})", dimId, dir.getName());
+                                continue;
+                            }
                         }
-                        if (DimensionCleaner.deleteList.contains(dimId)) {
-                            FileUtils.deleteDirectory(dir);
-                            LOG.info("Deleted PersonalSpace world {} (at {})", dimId, dir.getName());
-                            continue;
-                        }
-
                         dimCfg.setSaveDirOverride(dir.getName());
                         dimCfg.registerWithDimensionManager(dimId, false);
                         LOG.info("Loaded PersonalSpace world {} (at {})", dimId, dir.getName());
